@@ -27,8 +27,8 @@
 class BitcoinExchange
 {
 	private:
-		std::map<std::string, std::optional<float>> _dataFileMap; // map to store date and exchange rate pairs
-		std::multimap<std::string, std::optional<float>> _inputFileMap; // multimap to store date and value pairs
+		std::map<std::string, float> _dataFileMap; // map to store date and exchange rate pairs
+		//std::multimap<std::string, std::optional<float>> _inputFileMap; // multimap to store date and value pairs
 		// std::string _dataFilename; // filename of the CSV file
 		// std::string _inputFilename; // filename of the input file
 		std::ifstream _inputFile; // input file stream
@@ -36,9 +36,9 @@ class BitcoinExchange
 	
 		bool isDateValid(const std::string &date) const;	//validate the date format
 		void parseDataFile(); //parse the CSV file and store the data in the map
-		void parseInputFile(); //parse the input file and store the data in the multimap
-		void calculateExchangeRate(); //calculate the exchange rate for each date in the input file
-
+		void parseInputAndPrint(); //parse the input file and store the data in the multimap
+		void calculateExchangeRate(std::string date, float value); //calculate the exchange rate for each date in the input file
+		float improvedStof(const std::string &str, bool& valid) const; //convert string to float with error handling
 	public:
 		BitcoinExchange();
 		BitcoinExchange(const std::string &inputFilename);	

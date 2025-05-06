@@ -23,10 +23,19 @@ BitcoinExchange::BitcoinExchange(const std::string &inputFilename)
 	// Parse the data file and store the data in the map
 	parseDataFile();
 	// Parse the input file and store the data in the multimap
-	parseInputFile();
-	// Calculate the exchange rate for each date in the input file
-	calculateExchangeRate();
+	parseInputAndPrint();
 }
+
+float BitcoinExchange::improvedStof(const std::string &str, bool& valid) const
+{
+	std::istringstream iss(str);
+	float value;
+	iss >> std::noskipws >> value; ///converts the string to float while not skipping  whitespace
+	valid = iss.eof() && !iss.fail(); //check if the conversion was successful and if there is no trailing garbage
+	return value;
+}
+
+//check also for negative values of the exchange rate
 
 void BitcoinExchange::parseDataFile()
 {
@@ -34,32 +43,30 @@ void BitcoinExchange::parseDataFile()
 	//check that the first line is "date,exchange_rate"
 	std::getline(_dataFile, line);
 	if (line != "date,exchange_rate")
-		throw std::runtime_error("Error while parsing CSV file:: invalid data file format.");
+		throw std::runtime_error("Error while parsing CSV file: invalid data file format.");
 	// Parse the data file and store the data in the map
 	while (std::getline(_dataFile, line))
 	{
+		if (line.empty())
+			continue;
 		char comma = ',';
 		if (line.find(comma) == std::string::npos)
-			std::cerr << "Error while parsing CSV file:: no comma delimiter found in line: " << line << std::endl;
+			std::cerr << "Error while parsing CSV file: no comma delimiter found in line: " << line << std::endl;
 		else
 		{
 			std::string date = line.substr(0, line.find(comma));
 			std::string rate = line.substr(line.find(comma) + 1);
-			std::optional<float> rateValue;
-			try 
+			float rateValue;
+			bool valid = false;
+			rateValue = improvedStof(rate, valid);
+			if (!valid)
 			{
-				rateValue = std::stof(rate);
-			}
-			catch (const std::invalid_argument &e)
-			{
-				std::cerr << "Error while parsing CSV file:: invalid exchange rate value: " << rate << std::endl;
-				rateValue = std::nullopt;
+				std::cerr << "Error while parsing CSV file: invalid exchange rate value: " << rate << std::endl;
 				continue;
 			}
-			catch (const std::out_of_range &e)
+			if (rateValue < 0)
 			{
-				std::cerr << "Error while parsing CSV file:: exchange rate value out of range: " << rate << std::endl;
-				rateValue = std::nullopt;
+				std::cerr << "Error while parsing CSV file: negative exchange rate " << line << std::endl;
 				continue;
 			}
 			_dataFileMap.insert(std::make_pair(date, rateValue));
@@ -68,80 +75,82 @@ void BitcoinExchange::parseDataFile()
 	
 }
 
-void BitcoinExchange::parseInputFile()
+void BitcoinExchange::parseInputAndPrint()
 {
 	std::string line;
 	//check that the first line is "date | value"
 	std::getline(_inputFile, line);
 	if (line != "date | value")
 		throw std::runtime_error("Error: invalid input file format.");
-	// Parse the input file and store the data in the multimap
+	// Parse the input file 
 	while (std::getline(_inputFile, line))
 	{
 		char pipe = '|';
 		if (line.find(pipe) == std::string::npos)
-			std::cerr << "Error: no pipe delimiter found in line: " << line << std::endl;
+			std::cerr << "Error: bad input => " << line << std::endl;
 		else
 		{
 			std::string date = line.substr(0, line.find(pipe));
-			//removing leading and trailing spaces
-			date.erase(0, date.find_first_not_of(" \t"));
-			date.erase(date.find_last_not_of(" \t") + 1);
+			//removing trailing space
+			//date.erase(0, date.find_first_not_of(" \t"));
+			date.erase(date.find_last_not_of(" \t") + 1);//remove trailing spaces
+			if (!isDateValid(date))
+			{
+				std::cerr << "Error: bad input => " << line << std::endl;
+				continue;
+			}
 			std::string value = line.substr(line.find(pipe) + 1);
-			std::optional<float> valueFloat;
-			try 
+			//removing leading space
+			value.erase(0, value.find_first_not_of(" \t"));
+			float valueFloat;
+			bool valid = false;
+			valueFloat = improvedStof(value, valid);
+			if (!valid)
 			{
-				valueFloat = std::stof(value);
-			}
-			catch (const std::invalid_argument &e)
-			{
-				std::cerr << "Error: invalid value: " << value << std::endl;
-				valueFloat = std::nullopt;
+				std::cerr << "Error: bad input => " << line << std::endl;
 				continue;
 			}
-			catch (const std::out_of_range &e)
+			if (valueFloat < 0)
 			{
-				std::cerr << "Error: value out of range: " << value << std::endl;
-				valueFloat = std::nullopt;
+				std::cerr << "Error: not a positive number." << std::endl;
 				continue;
 			}
-			_inputFileMap.insert(std::make_pair(date, valueFloat));
+			if (valueFloat > 1000)
+			{
+				std::cerr << "Error: too large a number." << std::endl;
+				continue;
+			}
+			calculateExchangeRate(date, valueFloat);
 		}
 	}
 }
 
-void BitcoinExchange::calculateExchangeRate()
+void BitcoinExchange::calculateExchangeRate(std::string date, float value)
 {
-	if (_inputFileMap.empty())
-	{
-		std::cerr << "Error: no data in input file." << std::endl;
-		return;
-	}
+	
 	if (_dataFileMap.empty())
 	{
 		std::cerr << "Error: no data in data file." << std::endl;
 		return;
 	}
-	for (auto iterator = _inputFileMap.begin(); iterator != _inputFileMap.end(); ++iterator)
+	// Find the closest date in the data file that is less than or equal to the input date
+	auto it = _dataFileMap.lower_bound(date); //means "find the first element that is greater than or equal to date"
+	if (it == _dataFileMap.end())
+		it--;
+	else if (it->first != date)
 	{
-		// Check if the date is valid
-		if (!isDateValid(iterator->first))
+		if (it == _dataFileMap.begin())
 		{
-			std::cerr << "Error: bad input: " << iterator->first << std::endl;
-			continue;
+			std::cerr << "Error: no valid date found for " << date << std::endl;
+			return;
 		}
-		// Check if the value is valid
-		if (iterator->second < 0 || iterator->second > 1000)
-		{
-			std::cerr << "Error: too large a number: " << *iterator->second << std::endl;
-			continue;
-		}
-		// Find the closest date in the data file that is less than or equal to the input date
-		//
-		// Calculate the exchange rate
-		
+		it--;
 	}
+	// Calculate the exchange rate
+	float exchangeRate = it->second * value;
+	std::cout << date << " => " << value << " = " << exchangeRate << std::endl;
 }
+
 
 bool BitcoinExchange::isDateValid(const std::string &date) const
 {
@@ -200,7 +209,6 @@ BitcoinExchange &BitcoinExchange::operator=(const BitcoinExchange &other)
 	if (this != &other)
 	{
 		_dataFileMap = other._dataFileMap;
-		_inputFileMap = other._inputFileMap;
 	}
 	return *this;
 }
