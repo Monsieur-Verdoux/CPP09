@@ -10,9 +10,9 @@
 #                                                                              #
 # **************************************************************************** #
 
-NAME := ex00
+NAME := btc
 CFLAGS := -Wall -Wextra -Werror
-SRC := main.cpp 
+SRC := main.cpp BitcoinExchange.cpp
 OBJ := $(SRC:.cpp=.o)
 
 all: $(NAME)
