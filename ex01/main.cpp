@@ -22,10 +22,17 @@ int main(int argc, char **argv)
 	try
 	{
 		RPN rpn(argv[1]);
+		int result = rpn.calculateRPN();
+		std::cout << "Result: " << result << std::endl;
 	}
 	catch (const std::exception &e)
 	{
 		std::cerr << e.what() << std::endl;
+		return 1;
+	}
+	catch (...)
+	{
+		std::cerr << "Error: unknown error occurred." << std::endl;
 		return 1;
 	}
 	return 0;

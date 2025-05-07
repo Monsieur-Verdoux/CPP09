@@ -22,13 +22,13 @@
 class RPN
 {
 	private:
-		std::stack<int> _stack; // stack to store the operands
 		std::string _inputString; 
-		int calculateRPN(); // function to calculate the RPN expression
+		void validateInput() const; // validate the input string
 	public:
 		RPN(); 
 		RPN(const std::string &inputString); 
-		RPN(const RPN &orighinal); // copy constructor
+		RPN(const RPN &original); // copy constructor
 		RPN &operator=(const RPN &original); 
 		~RPN(); 
+		int calculateRPN() const; // calculate the RPN expression, const is added to indicate that this method does not modify the object
 };
