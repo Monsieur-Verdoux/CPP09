@@ -22,19 +22,20 @@
 class PmergeMe
 {
 	private:
-		const std::string _inputString; // input string
 		int _argc; // number of arguments
 		std::vector<int> _vecSorted; // vector to store integers
 		std::vector<int> _vecUnsorted; // vector to store integers
 		std::deque<int> _dequeSorted; // deque to store integers
 		std::deque<int> _dequeUnsorted; // deque to store integers
-		void validateInput(); // validate the input string
+		void validateInput(char **argv, int argc); // validate the input string
 		unsigned int jacobsthalCalc(unsigned int n) const; // calculate the Jacobsthal number
 		void jacobsthalInsertion(std::vector<int> &mainChain, std::vector<int> &subChain); // perform the Jacobsthal insertion
-		std::vector<int> vectorSort(std::vector<int> vec); // sort the vector using the Jacobsthal number
+		//std::vector<int> vectorSort(std::vector<int> vec); // sort the vector using the Jacobsthal number
+		void vectorSort(unsigned int pairSize); // sort the vector using the Jacobsthal number
 	public:
 		PmergeMe(); // default constructor
-		PmergeMe(const std::string &inputString); // constructor with input string
+		//rewrite the constructor to take argv and argc
+		PmergeMe(char **argv, int argc);
 		PmergeMe(const PmergeMe &original); // copy constructor
 		PmergeMe &operator=(const PmergeMe &original); // assignment operator
 		~PmergeMe(); // destructor
