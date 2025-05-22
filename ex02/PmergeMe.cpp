@@ -82,7 +82,7 @@ void PmergeMe::vectorSort(unsigned int pairSize)
 		int lastOfSecondPair = *(secondPairStart + pairSize - 1);
 
 		if (lastOfFirstPair > lastOfSecondPair) 
-			std::swap_ranges(firstPairStart, secondPairStart, secondPairStart);
+			std::swap_ranges(firstPairStart, secondPairStart, secondPairStart); 
 	}
 
 	std::cout << "vecSorted: ";
@@ -92,6 +92,93 @@ void PmergeMe::vectorSort(unsigned int pairSize)
 
 	vectorSort(pairSize * 2);
 
+	//now we will create the main and sub chains and will put into them the pairSize pairs of numbers
+	//we will also check for the remainder here
+	std::vector<int> mainChain;
+	std::vector<int> subChain;
+
+	//first the main chain is initialized with elements which may include multiple integers based on pairSize, which will be elements b1 and the rest of a, while sub chain is initialized with all the b
+	// first we push the very first pair of pairSize into the main chain and then we loop putting only every second element (the a's) into the main chain
+
+
+	//push the first pair of pairSize into the main chain
+	auto firstPairStart = _vecSorted.begin(); //auto replaces std::vector<int>::iterator here
+	for (size_t i = 0; i < pairSize; ++i)
+	{
+		mainChain.push_back(*(firstPairStart + i));
+	}
+	std::cout << "Main chain after first pair: ";
+	for (const auto& val : mainChain)
+		std::cout << val << " ";
+	std::cout << std::endl;
+
+
+	//now the as are pushed into the main chain
+	for (size_t i = pairSize; i - 1 < n; i += pairSize * 2)
+	{
+		auto pairStart = _vecSorted.begin() + i;
+		if (i + pairSize - 1 >= n)
+			break;
+		for (size_t j = 0; j < pairSize; ++j)
+		{
+			mainChain.push_back(*(pairStart + j));
+		}
+	}
+	
+	std::cout << "Main chain after inserting the rest of as: ";
+	for (const auto& val : mainChain)
+		std::cout << val << " ";
+	std::cout << std::endl;
+
+	//now the sub chain starting with b2 and then the rest of bs
+	for (size_t i = pairSize * 2 ; i - 1 < n; i += pairSize * 2)
+	{
+		auto pairStart = _vecSorted.begin() + i;
+		//std::cout << "i is currently: " << i << " and the vector size is: " << n << " and i + pairSize * 2 - 1 is: " << i + pairSize * 2 - 1 << std::endl;
+		//std ::cout << "pairStart: " << *pairStart << std::endl;
+		if (i + pairSize - 1 >= n)
+			break;
+		for (size_t j = 0; j < pairSize; ++j)
+		{
+			subChain.push_back(*(pairStart + j));
+		}
+	}
+	std::cout << "Sub chain: ";	
+	for (const auto& val : subChain)
+		std::cout << val << " ";
+	std::cout << std::endl;	
+
+	
+
+	// int isRemainder = -1;
+	// //remainder will also be the size of the pairSize pairs
+	// if (n % (pairSize * 2) != 0)
+	// 	isRemainder = 1;
+	// //print out the remainder which may include multiple numbers based on pairSize so FOR loop is calculated based on pairSize
+	//  std::cout << "Remainder: ";
+	// if (isRemainder == 1)
+	// {
+	// 	for (size_t i = n - n % (pairSize * 2); i < n; ++i)
+	// 	{
+	// 		if (i % pairSize == 0 && i != 0)
+	// 			std::cout << " ";
+	// 		std::cout << _vecSorted[i] << " ";
+	// 	}
+	// 	std::cout << std::endl;
+	// }
+	// else
+	// 	std::cout << "No remainder" << std::endl;
+
+
+	// for (size_t i = 0; pairSize * 2 + i < n; ++i)
+	// {
+	// 	if (i % pairSize == 0 && i != 0)
+	// 		std::cout << " ";
+	// 	std::cout << _vecSorted[i] << " ";
+	// }
+	// std::cout << std::endl;
+
+	
 	
 	
 	
