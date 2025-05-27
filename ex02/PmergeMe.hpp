@@ -33,6 +33,8 @@ class PmergeMe
 		void jacobsthalInsertion(std::vector<int> &mainChain, std::vector<int> &subChain); // perform the Jacobsthal insertion
 		//std::vector<int> vectorSort(std::vector<int> vec); // sort the vector using the Jacobsthal number
 		void vectorSort(unsigned int pairSize); // sort the vector using the Jacobsthal number
+		void dequeSort(unsigned int pairSize); // sort the deque using the Jacobsthal number
+		void jacobsthalInsertionDeq(std::deque<int> &mainChain, std::deque<int> &subChain); // perform the Jacobsthal insertion for deque
 	public:
 		PmergeMe(); // default constructor
 		//rewrite the constructor to take argv and argc

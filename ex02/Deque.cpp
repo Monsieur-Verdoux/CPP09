@@ -1,109 +1,13 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   PmergeMe.cpp                                       :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: akovalev <akovalev@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/05/20 16:30:58 by akovalev          #+#    #+#             */
-/*   Updated: 2025/05/20 16:30:58 by akovalev         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "PmergeMe.hpp"
 
-PmergeMe::PmergeMe(char **argv, int argc) : _argc(argc)
+void PmergeMe::dequeSort(unsigned int pairSize) 
 {
-	validateInput(argv, argc);
-
-	auto startVec = std::chrono::high_resolution_clock::now();
-	_vecSorted = _vecUnsorted;
-	vectorSort(1);
-	auto endVec = std::chrono::high_resolution_clock::now();
-	auto durationVec = std::chrono::duration_cast<std::chrono::microseconds>(endVec - startVec);
-	std::cout << "Before: ";
-	for (size_t i = 0; i < _vecUnsorted.size(); ++i)
-		std::cout << _vecUnsorted[i] << " ";
-	std::cout << std::endl;
-	std::cout << "After: ";
-	for (size_t i = 0; i < _vecSorted.size(); ++i)
-		std::cout << _vecSorted[i] << " ";
-	std::cout << std::endl;
-	//check that the vector is sorted
-	for (size_t i = 0; i < _vecSorted.size() - 1; ++i)
-	{
-		if (_vecSorted[i] > _vecSorted[i + 1])
-			throw std::runtime_error("Error: vector is not sorted.");
-	}
-	//std::cout << std::endl;
-	std::cout << "Time to process a range of " << _vecUnsorted.size() << " elements with std::vector: " 
-			  << durationVec.count() << " us" << std::endl;
-	
-	auto startDeq = std::chrono::high_resolution_clock::now();
-	_dequeSorted = _dequeUnsorted;
-	dequeSort(1);
-	auto endDeq = std::chrono::high_resolution_clock::now();
-	auto durationDeq = std::chrono::duration_cast<std::chrono::microseconds>(endDeq - startDeq);
-	//std::cout << std::endl;
-	//std::cout << "Unsorted deque: ";
-	//for (size_t i = 0; i < _dequeUnsorted.size(); ++i)
-	//	std::cout << _dequeUnsorted[i] << " ";
-	//std::cout << std::endl;
-	//std::cout << "Sorted deque: ";
-	//for (size_t i = 0; i < _dequeSorted.size(); ++i)
-	//	std::cout << _dequeSorted[i] << " ";
-	//check that the deque is sorted
-	for (size_t i = 0; i < _dequeSorted.size() - 1; ++i)
-	{
-		if (_dequeSorted[i] > _dequeSorted[i + 1])
-			throw std::runtime_error("Error: deque is not sorted.");
-	}
-	//std::cout << std::endl;
-	std::cout << "Time to process a range of " << _dequeUnsorted.size() << " elements with std::deque: " 
-			  << durationDeq.count() << " us" << std::endl;
-}
-
-void PmergeMe::validateInput(char **argv, int argc)
-{
-	//rewriting it to take argv and argc
-	//check for empty input
-	if (argc < 2)
-		throw std::runtime_error("Error: please provide a string of integers.");
-	//check for invalid characters
-	for (int i = 1; i < argc; ++i)
-	{
-		std::string arg = argv[i];
-		if (arg.find_first_not_of("0123456789") != std::string::npos)
-			throw std::runtime_error("Error: input string contains invalid characters.");
-		//since there should now be only numbers in a sequence and no spaces there will only be one token so no need to call iss >> token
-		try 
-		{
-			int num = std::stoi(arg);
-			if (std::find(_vecUnsorted.begin(), _vecUnsorted.end(), num) != _vecUnsorted.end())
-				throw std::runtime_error("Error: duplicate numbers are not allowed.");
-			_vecUnsorted.push_back(num);
-			_dequeUnsorted.push_back(num);
-		}
-		catch (const std::out_of_range &e)
-		{
-			throw std::runtime_error("Error: number is greater than int max.");
-		}
-		catch (const std::invalid_argument &e)
-		{
-			throw std::runtime_error("Error: invalid argument(not a number).");
-		}
-	}
-
-}
-
-void PmergeMe::vectorSort(unsigned int pairSize) 
-{
-	size_t n = _vecSorted.size();
-	if (pairSize * 2 > _vecSorted.size())
+	size_t n = _dequeSorted.size();
+	if (pairSize * 2 > _dequeSorted.size())
 		return;
 	for (size_t i = 0; i + 2 * pairSize - 1 < n; i += 2 * pairSize)
 	{
-		auto firstPairStart = _vecSorted.begin() + i; //auto replaces std::vector<int>::iterator here
+		auto firstPairStart = _dequeSorted.begin() + i; //auto replaces std::deque<int>::iterator here
 		auto secondPairStart = firstPairStart + pairSize;
 
 		int lastOfFirstPair = *(firstPairStart + pairSize - 1); //dereferencing the iterator to get the last element of the first pair
@@ -113,24 +17,19 @@ void PmergeMe::vectorSort(unsigned int pairSize)
 			std::swap_ranges(firstPairStart, secondPairStart, secondPairStart); 
 	}
 
-	//std::cout << "vecSorted: ";
-	//for (const auto& val : _vecSorted)
-	//	std::cout << val << " ";
-//	std::cout << std::endl;
-
-	vectorSort(pairSize * 2);
+	dequeSort(pairSize * 2);
 
 	//now we will create the main and sub chains and will put into them the pairSize pairs of numbers
 	//we will also check for the remainder here
-	std::vector<int> mainChain;
-	std::vector<int> subChain;
+	std::deque<int> mainChain;
+	std::deque<int> subChain;
 
 	//first the main chain is initialized with elements which may include multiple integers based on pairSize, which will be elements b1 and the rest of a, while sub chain is initialized with all the b
 	// first we push the very first pair of pairSize into the main chain and then we loop putting only every second element (the a's) into the main chain
 
 
 	//push the first pair of pairSize into the main chain
-	auto firstPairStart = _vecSorted.begin(); //auto replaces std::vector<int>::iterator here
+	auto firstPairStart = _dequeSorted.begin(); //auto replaces std::deque<int>::iterator here
 	for (size_t i = 0; i < pairSize; ++i)
 	{
 		mainChain.push_back(*(firstPairStart + i));
@@ -144,7 +43,7 @@ void PmergeMe::vectorSort(unsigned int pairSize)
 	//now the as are pushed into the main chain
 	for (size_t i = pairSize; i - 1 < n; i += pairSize * 2)
 	{
-		auto pairStart = _vecSorted.begin() + i;
+		auto pairStart = _dequeSorted.begin() + i;
 		if (i + pairSize - 1 >= n)
 			break;
 		for (size_t j = 0; j < pairSize; ++j)
@@ -161,8 +60,8 @@ void PmergeMe::vectorSort(unsigned int pairSize)
 	//now the sub chain starting with b2 and then the rest of bs
 	for (size_t i = pairSize * 2 ; i - 1 < n; i += pairSize * 2)
 	{
-		auto pairStart = _vecSorted.begin() + i;
-		//std::cout << "i is currently: " << i << " and the vector size is: " << n << " and i + pairSize * 2 - 1 is: " << i + pairSize * 2 - 1 << std::endl;
+		auto pairStart = _dequeSorted.begin() + i;
+		//std::cout << "i is currently: " << i << " and the deque size is: " << n << " and i + pairSize * 2 - 1 is: " << i + pairSize * 2 - 1 << std::endl;
 		//std ::cout << "pairStart: " << *pairStart << std::endl;
 		if (i + pairSize - 1 >= n)
 			break;
@@ -186,7 +85,7 @@ void PmergeMe::vectorSort(unsigned int pairSize)
 //	std::cout << "Previous jacobsthal number is: " << jacobsthalPrev << std::endl;
 
 
-	std::vector<bool> inserted(subChain.size(), false);
+	std::deque<bool> inserted(subChain.size(), false);
 
 
 	while (insertions > 0)
@@ -279,7 +178,7 @@ void PmergeMe::vectorSort(unsigned int pairSize)
 	// 	{
 	// 		if (i % pairSize == 0 && i != 0)
 	// 			std::cout << " ";
-	// 		std::cout << _vecSorted[i] << " ";
+	// 		std::cout << _dequeSorted[i] << " ";
 	// 	}
 	// 	std::cout << std::endl;
 	// }
@@ -291,7 +190,7 @@ void PmergeMe::vectorSort(unsigned int pairSize)
 	// {
 	// 	if (i % pairSize == 0 && i != 0)
 	// 		std::cout << " ";
-	// 	std::cout << _vecSorted[i] << " ";
+	// 	std::cout << _dequeSorted[i] << " ";
 	// }
 	// std::cout << std::endl;
 
@@ -307,10 +206,10 @@ void PmergeMe::vectorSort(unsigned int pairSize)
 	// }
 
 	for (size_t i = 0; i < mainChain.size(); ++i)
-			_vecSorted[i] = mainChain[i];
+			_dequeSorted[i] = mainChain[i];
 	//std::cout << "-------------------------------------------" << std::endl;
-	//std::cout << "Sorted vector after vectorSort: ";
-	//for (const auto& val : _vecSorted)
+	//std::cout << "Sorted deque after dequeSort: ";
+	//for (const auto& val : _dequeSorted)
 	//	std::cout << val << " ";
 //std::cout << std::endl;
 	//std::cout << "-------------------------------------------" << std::endl;
@@ -318,22 +217,22 @@ void PmergeMe::vectorSort(unsigned int pairSize)
 	return;
 }
 
-// std::vector<int> PmergeMe::vectorSort(std::vector<int> vec)
+// std::deque<int> PmergeMe::dequeSort(std::deque<int> deque)
 // {
 // 	//implement the ford johnson merge insertion sort algorithm here
-// 	std::vector<int> mainChain;
-// 	std::vector<int> subChain;
-// 	std::vector<std::pair<int, int>> pairs;
+// 	std::deque<int> mainChain;
+// 	std::deque<int> subChain;
+// 	std::deque<std::pair<int, int>> pairs;
 // 	int remainder = -1;
 
-// 	if (vec.size() < 2)
-// 		return vec;
+// 	if (deque.size() < 2)
+// 		return deque;
 
 // 	size_t i = 0;
-// 	while (i + 1 < vec.size())
+// 	while (i + 1 < deque.size())
 // 	{
-// 		int first = vec[i];
-// 		int second = vec[i + 1];
+// 		int first = deque[i];
+// 		int second = deque[i + 1];
 // 		if (first < second)
 // 			pairs.push_back(std::make_pair(first, second));
 // 		else
@@ -342,8 +241,8 @@ void PmergeMe::vectorSort(unsigned int pairSize)
 // 		i += 2;
 // 	}
 // 	//check for remainder
-// 	if (vec.size() % 2 == 1)
-// 		remainder = vec.back();
+// 	if (deque.size() % 2 == 1)
+// 		remainder = deque.back();
 
 // 	//now that we have the pairs, we can sort them, first we push the biggest number of the pair to the main chain
 // 	for (size_t i = 0; i < pairs.size(); ++i)
@@ -356,7 +255,7 @@ void PmergeMe::vectorSort(unsigned int pairSize)
 // 	for (size_t i = 0; i < pairs.size(); ++i)
 // 		subChain.push_back(pairs[i].first);
 // 	//now the recursive call 
-// 	mainChain = vectorSort(mainChain);
+// 	mainChain = dequeSort(mainChain);
 	
 // 	//std::cout << "Sub chain: ";
 // 	// for (size_t i = 0; i < subChain.size(); ++i)
@@ -375,7 +274,7 @@ void PmergeMe::vectorSort(unsigned int pairSize)
 // 	return mainChain;
 // }
 
-void PmergeMe::jacobsthalInsertion(std::vector<int> &mainChain, std::vector<int> &subChain)
+void PmergeMe::jacobsthalInsertionDeq(std::deque<int> &mainChain, std::deque<int> &subChain)
 {
 	//implement the jacobsthal insertion here, placeholder for now
 	for (size_t i = 0; i < subChain.size(); ++i)
@@ -383,36 +282,4 @@ void PmergeMe::jacobsthalInsertion(std::vector<int> &mainChain, std::vector<int>
 		auto it = std::lower_bound(mainChain.begin(), mainChain.end(), subChain[i]);
 		mainChain.insert(it, subChain[i]);
 	}
-}
-
-unsigned int PmergeMe::jacobsthalCalc(unsigned int n) const
-{
-	//implement the jacobsthal calculation here, placeholder for now
-	if (n == 0)
-		return 0;
-	else if (n == 1)
-		return 1;
-	else
-		return jacobsthalCalc(n - 1) + 2 * jacobsthalCalc(n - 2);
-}
-
-PmergeMe::PmergeMe()
-{
-	
-}
-
-PmergeMe::PmergeMe(const PmergeMe &original) 
-{
-	(void)original;
-}
-
-PmergeMe &PmergeMe::operator=(const PmergeMe &original)
-{
-	(void)original; 
-	return *this;
-}
-
-PmergeMe::~PmergeMe() 
-{
-
 }
