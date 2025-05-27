@@ -143,11 +143,69 @@ void PmergeMe::vectorSort(unsigned int pairSize)
 			subChain.push_back(*(pairStart + j));
 		}
 	}
+
 	std::cout << "Sub chain: ";	
 	for (const auto& val : subChain)
 		std::cout << val << " ";
 	std::cout << std::endl;	
+	
+	unsigned int jacobsthalPrev = jacobsthalCalc(2);
+	unsigned int jacobsthalCurr = jacobsthalCalc(3);
+	int insertions = jacobsthalCurr - jacobsthalPrev;
 
+	while (insertions > 0)
+	{
+		if (insertions <= 0)
+			break;
+		if ((size_t)insertions > subChain.size())
+			break;
+		std::cout << "Insertions: " << insertions << " and the size of subChain is: " << subChain.size() << std::endl;
+		int indexOffset = 0;
+		while (insertions > 0)
+		{
+			int insertIndexSub = (jacobsthalCurr - 1) * pairSize - 1 - indexOffset;
+			std::cout << "Pair size: " << pairSize << std::endl;
+			std::cout << "Insert index sub: " << insertIndexSub << std::endl;
+			if (insertIndexSub < 0 || insertIndexSub >= (int)subChain.size())
+			{
+				std::cout << "Insert index sub is out of bounds, breaking the loop." << std::endl;
+				break;
+			}
+			std::cout << "The biggest number in the inserted chunk is : " << subChain[insertIndexSub] << std::endl;
+			//now we find where to insert the subChain element into the mainChain
+			//for that we need to look at the biggest numbers each pairSize element in the mainChainbut only up to corresponding index of "a" for the "b" we are inserting
+			std:: cout << "Main chain before insertion: ";
+			for (const auto& val : mainChain)
+				std::cout << val << " ";
+			std::cout << std::endl;
+			std::cout << "Looking for the position to insert the chunk of subChain at index: " << insertIndexSub << " with value: " << subChain[insertIndexSub] << std::endl;
+			//we need to find the position in the mainChain where we can insert the subChain element
+			auto insertionIt = mainChain.end(); // default to end in case nothing is greater
+			for (auto it = mainChain.begin(); it + pairSize - 1 < mainChain.end(); it += pairSize) {
+				if (*(it + pairSize - 1) >= subChain[insertIndexSub]) {
+					insertionIt = it;
+					break;
+				}
+			}
+			//auto it = std::lower_bound(mainChain.begin(), mainChain.end(), subChain[insertIndexSub]);
+			std::cout << "The iterator points to: " << *insertionIt << std::endl;
+			//now we insert the whole pairSize chunk of subChain into the mainChain at the found position with offset of pairSize
+			//mainChain.insert(it - pairSize + 1, subChain.begin() + insertIndexSub - pairSize + 1, subChain.begin() + insertIndexSub + 1);
+			mainChain.insert(insertionIt, subChain.begin() + insertIndexSub - pairSize + 1, subChain.begin() + insertIndexSub + 1);
+
+			std::cout << "Main chain after insertion of the chunk: ";
+			for (const auto& val : mainChain)
+				std::cout << val << " ";
+			std::cout << std::endl;
+			insertions--;
+			indexOffset += pairSize;
+		}
+		jacobsthalPrev = jacobsthalCurr;
+		jacobsthalCurr = jacobsthalCalc(jacobsthalCurr + 1);
+		insertions = jacobsthalCurr - jacobsthalPrev;
+		std::cout << "Next jacobsthal number is: " << jacobsthalCurr << std::endl;
+		std::cout << "Next insertions count is: " << insertions << std::endl;
+	}
 	
 
 	// int isRemainder = -1;
@@ -188,6 +246,15 @@ void PmergeMe::vectorSort(unsigned int pairSize)
 	// 	auto it = std::lower_bound(mainChain.begin(), mainChain.end(), remainder);
 	// 	mainChain.insert(it, remainder);
 	// }
+
+	for (size_t i = 0; i < mainChain.size(); ++i)
+			_vecSorted[i] = mainChain[i];
+	std::cout << "-------------------------------------------" << std::endl;
+	std::cout << "Sorted vector after vectorSort: ";
+	for (const auto& val : _vecSorted)
+		std::cout << val << " ";
+	std::cout << std::endl;
+	std::cout << "-------------------------------------------" << std::endl;
 
 	return;
 }
@@ -257,6 +324,17 @@ void PmergeMe::jacobsthalInsertion(std::vector<int> &mainChain, std::vector<int>
 		auto it = std::lower_bound(mainChain.begin(), mainChain.end(), subChain[i]);
 		mainChain.insert(it, subChain[i]);
 	}
+}
+
+unsigned int PmergeMe::jacobsthalCalc(unsigned int n) const
+{
+	//implement the jacobsthal calculation here, placeholder for now
+	if (n == 0)
+		return 0;
+	else if (n == 1)
+		return 1;
+	else
+		return jacobsthalCalc(n - 1) + 2 * jacobsthalCalc(n - 2);
 }
 
 PmergeMe::PmergeMe()
