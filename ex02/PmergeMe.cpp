@@ -149,9 +149,17 @@ void PmergeMe::vectorSort(unsigned int pairSize)
 		std::cout << val << " ";
 	std::cout << std::endl;	
 	
-	unsigned int jacobsthalPrev = jacobsthalCalc(2);
-	unsigned int jacobsthalCurr = jacobsthalCalc(3);
+	unsigned int jacobsthalIndex = 3; 
+	unsigned int jacobsthalPrev = jacobsthalCalc(jacobsthalIndex - 1); // calc(2)
+	unsigned int jacobsthalCurr = jacobsthalCalc(jacobsthalIndex);     // calc(3)
 	int insertions = jacobsthalCurr - jacobsthalPrev;
+	std::cout << "Initial jacobsthal number is: " << jacobsthalCurr << std::endl;
+	std::cout << "Initial insertions count is: " << insertions << std::endl;
+	std::cout << "Previous jacobsthal number is: " << jacobsthalPrev << std::endl;
+
+
+	std::vector<bool> inserted(subChain.size(), false);
+
 
 	while (insertions > 0)
 	{
@@ -197,17 +205,40 @@ void PmergeMe::vectorSort(unsigned int pairSize)
 			for (const auto& val : mainChain)
 				std::cout << val << " ";
 			std::cout << std::endl;
+			inserted[insertIndexSub] = true;
+
 			insertions--;
 			indexOffset += pairSize;
 		}
+
+		jacobsthalIndex++;
 		jacobsthalPrev = jacobsthalCurr;
-		jacobsthalCurr = jacobsthalCalc(jacobsthalCurr + 1);
+		jacobsthalCurr = jacobsthalCalc(jacobsthalIndex);
+		insertions = jacobsthalCurr - jacobsthalPrev;
 		insertions = jacobsthalCurr - jacobsthalPrev;
 		std::cout << "Next jacobsthal number is: " << jacobsthalCurr << std::endl;
 		std::cout << "Next insertions count is: " << insertions << std::endl;
 	}
 	
-
+			for (int i = subChain.size() - 1; i >= static_cast<int>(pairSize - 1); i -= pairSize) 
+			{
+			if (inserted[i])
+				continue;
+		
+			// Insert chunk ending at index i
+			auto insertionIt = mainChain.end();
+			for (auto it = mainChain.begin(); it + pairSize - 1 < mainChain.end(); it += pairSize) {
+				if (*(it + pairSize - 1) >= subChain[i]) {
+					insertionIt = it;
+					break;
+				}
+			}
+			mainChain.insert(insertionIt, subChain.begin() + i - pairSize + 1, subChain.begin() + i + 1);
+			std::cout << "after Jacobstal ran out, Main chain after inserting the chunk ending at index " << i << ": ";
+			for (const auto& val : mainChain)
+				std::cout << val << " ";
+			std::cout << std::endl;
+		}
 	// int isRemainder = -1;
 	// //remainder will also be the size of the pairSize pairs
 	// if (n % (pairSize * 2) != 0)
