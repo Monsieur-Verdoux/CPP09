@@ -17,26 +17,26 @@ PmergeMe::PmergeMe(char **argv, int argc) : _argc(argc)
 	validateInput(argv, argc);
 
 	auto startVec = std::chrono::high_resolution_clock::now();
-	_vecSorted = _vecUnsorted;
+	_vectorSorted = _vectorUnsorted;
 	vectorSort(1);
 	auto endVec = std::chrono::high_resolution_clock::now();
 	auto durationVec = std::chrono::duration_cast<std::chrono::microseconds>(endVec - startVec);
 	std::cout << "Before: ";
-	for (size_t i = 0; i < _vecUnsorted.size(); ++i)
-		std::cout << _vecUnsorted[i] << " ";
+	for (size_t i = 0; i < _vectorUnsorted.size(); ++i)
+		std::cout << _vectorUnsorted[i] << " ";
 	std::cout << std::endl;
 	std::cout << "After: ";
-	for (size_t i = 0; i < _vecSorted.size(); ++i)
-		std::cout << _vecSorted[i] << " ";
+	for (size_t i = 0; i < _vectorSorted.size(); ++i)
+		std::cout << _vectorSorted[i] << " ";
 	std::cout << std::endl;
 	//check that the vector is sorted
-	for (size_t i = 0; i < _vecSorted.size() - 1; ++i)
+	for (size_t i = 0; i < _vectorSorted.size() - 1; ++i)
 	{
-		if (_vecSorted[i] > _vecSorted[i + 1])
+		if (_vectorSorted[i] > _vectorSorted[i + 1])
 			throw std::runtime_error("Error: vector is not sorted.");
 	}
 	//std::cout << std::endl;
-	std::cout << "Time to process a range of " << _vecUnsorted.size() << " elements with std::vector: " 
+	std::cout << "Time to process a range of " << _vectorUnsorted.size() << " elements with std::vector: " 
 			  << durationVec.count() << " us" << std::endl;
 	
 	auto startDeq = std::chrono::high_resolution_clock::now();
@@ -44,14 +44,14 @@ PmergeMe::PmergeMe(char **argv, int argc) : _argc(argc)
 	dequeSort(1);
 	auto endDeq = std::chrono::high_resolution_clock::now();
 	auto durationDeq = std::chrono::duration_cast<std::chrono::microseconds>(endDeq - startDeq);
-	//std::cout << std::endl;
-	//std::cout << "Unsorted deque: ";
-	//for (size_t i = 0; i < _dequeUnsorted.size(); ++i)
-	//	std::cout << _dequeUnsorted[i] << " ";
-	//std::cout << std::endl;
-	//std::cout << "Sorted deque: ";
-	//for (size_t i = 0; i < _dequeSorted.size(); ++i)
-	//	std::cout << _dequeSorted[i] << " ";
+	// std::cout << std::endl;
+	// std::cout << "Unsorted deque: ";
+	// for (size_t i = 0; i < _dequeUnsorted.size(); ++i)
+	// 	std::cout << _dequeUnsorted[i] << " ";
+	// std::cout << std::endl;
+	// std::cout << "Sorted deque: ";
+	// for (size_t i = 0; i < _dequeSorted.size(); ++i)
+	// 	std::cout << _dequeSorted[i] << " ";
 	//check that the deque is sorted
 	for (size_t i = 0; i < _dequeSorted.size() - 1; ++i)
 	{
@@ -79,9 +79,9 @@ void PmergeMe::validateInput(char **argv, int argc)
 		try 
 		{
 			int num = std::stoi(arg);
-			if (std::find(_vecUnsorted.begin(), _vecUnsorted.end(), num) != _vecUnsorted.end())
+			if (std::find(_vectorUnsorted.begin(), _vectorUnsorted.end(), num) != _vectorUnsorted.end())
 				throw std::runtime_error("Error: duplicate numbers are not allowed.");
-			_vecUnsorted.push_back(num);
+			_vectorUnsorted.push_back(num);
 			_dequeUnsorted.push_back(num);
 		}
 		catch (const std::out_of_range &e)
@@ -96,227 +96,234 @@ void PmergeMe::validateInput(char **argv, int argc)
 
 }
 
-void PmergeMe::vectorSort(unsigned int pairSize) 
-{
-	size_t n = _vecSorted.size();
-	if (pairSize * 2 > _vecSorted.size())
-		return;
-	for (size_t i = 0; i + 2 * pairSize - 1 < n; i += 2 * pairSize)
-	{
-		auto firstPairStart = _vecSorted.begin() + i; //auto replaces std::vector<int>::iterator here
-		auto secondPairStart = firstPairStart + pairSize;
+// void PmergeMe::vectorSort(unsigned int pairSize) 
+// {
+// 	size_t n = _vectorSorted.size();
+// 	if (pairSize * 2 > _vectorSorted.size())
+// 		return;
+// 	for (size_t i = 0; i + 2 * pairSize - 1 < n; i += 2 * pairSize)
+// 	{
+// 		auto firstPairStart = _vectorSorted.begin() + i; //auto replaces std::vector<int>::iterator here
+// 		auto secondPairStart = firstPairStart + pairSize;
 
-		int lastOfFirstPair = *(firstPairStart + pairSize - 1); //dereferencing the iterator to get the last element of the first pair
-		int lastOfSecondPair = *(secondPairStart + pairSize - 1);
+// 		int lastOfFirstPair = *(firstPairStart + pairSize - 1); //dereferencing the iterator to get the last element of the first pair
+// 		int lastOfSecondPair = *(secondPairStart + pairSize - 1);
 
-		if (lastOfFirstPair > lastOfSecondPair) 
-			std::swap_ranges(firstPairStart, secondPairStart, secondPairStart); 
-	}
+// 		if (lastOfFirstPair > lastOfSecondPair) 
+// 			std::swap_ranges(firstPairStart, secondPairStart, secondPairStart); 
+// 	}
 
-	//std::cout << "vecSorted: ";
-	//for (const auto& val : _vecSorted)
-	//	std::cout << val << " ";
-//	std::cout << std::endl;
+// 	//std::cout << "vectorSorted: ";
+// 	//for (const auto& val : _vectorSorted)
+// 	//	std::cout << val << " ";
+// //	std::cout << std::endl;
 
-	vectorSort(pairSize * 2);
+// 	vectorSort(pairSize * 2);
 
-	//now we will create the main and sub chains and will put into them the pairSize pairs of numbers
-	//we will also check for the remainder here
-	std::vector<int> mainChain;
-	std::vector<int> subChain;
+// 	//now we will create the main and sub chains and will put into them the pairSize pairs of numbers
+// 	//we will also check for the remainder here
+// 	std::vector<int> mainChain;
+// 	std::vector<int> subChain;
 
-	//first the main chain is initialized with elements which may include multiple integers based on pairSize, which will be elements b1 and the rest of a, while sub chain is initialized with all the b
-	// first we push the very first pair of pairSize into the main chain and then we loop putting only every second element (the a's) into the main chain
-
-
-	//push the first pair of pairSize into the main chain
-	auto firstPairStart = _vecSorted.begin(); //auto replaces std::vector<int>::iterator here
-	for (size_t i = 0; i < pairSize; ++i)
-	{
-		mainChain.push_back(*(firstPairStart + i));
-	}
-//	std::cout << "Main chain after first pair: ";
-	//for (const auto& val : mainChain)
-	//	std::cout << val << " ";
-	//std::cout << std::endl;
+// 	//first the main chain is initialized with elements which may include multiple integers based on pairSize, which will be elements b1 and the rest of a, while sub chain is initialized with all the b
+// 	// first we push the very first pair of pairSize into the main chain and then we loop putting only every second element (the a's) into the main chain
 
 
-	//now the as are pushed into the main chain
-	for (size_t i = pairSize; i - 1 < n; i += pairSize * 2)
-	{
-		auto pairStart = _vecSorted.begin() + i;
-		if (i + pairSize - 1 >= n)
-			break;
-		for (size_t j = 0; j < pairSize; ++j)
-		{
-			mainChain.push_back(*(pairStart + j));
-		}
-	}
+// 	//push the first pair of pairSize into the main chain
+// 	auto firstPairStart = _vectorSorted.begin(); //auto replaces std::vector<int>::iterator here
+// 	for (size_t i = 0; i < pairSize; ++i)
+// 	{
+// 		mainChain.push_back(*(firstPairStart + i));
+// 	}
+// //	std::cout << "Main chain after first pair: ";
+// 	//for (const auto& val : mainChain)
+// 	//	std::cout << val << " ";
+// 	//std::cout << std::endl;
+
+
+// 	//now the as are pushed into the main chain
+// 	for (size_t i = pairSize; i - 1 < n; i += pairSize * 2)
+// 	{
+// 		auto pairStart = _vectorSorted.begin() + i;
+// 		if (i + pairSize - 1 >= n)
+// 			break;
+// 		for (size_t j = 0; j < pairSize; ++j)
+// 		{
+// 			mainChain.push_back(*(pairStart + j));
+// 		}
+// 	}
 	
-	//std::cout << "Main chain after inserting the rest of as: ";
-//	for (const auto& val : mainChain)
-	//	std::cout << val << " ";
-	//std::cout << std::endl;
+// 	//std::cout << "Main chain after inserting the rest of as: ";
+// //	for (const auto& val : mainChain)
+// 	//	std::cout << val << " ";
+// 	//std::cout << std::endl;
 
-	//now the sub chain starting with b2 and then the rest of bs
-	for (size_t i = pairSize * 2 ; i - 1 < n; i += pairSize * 2)
-	{
-		auto pairStart = _vecSorted.begin() + i;
-		//std::cout << "i is currently: " << i << " and the vector size is: " << n << " and i + pairSize * 2 - 1 is: " << i + pairSize * 2 - 1 << std::endl;
-		//std ::cout << "pairStart: " << *pairStart << std::endl;
-		if (i + pairSize - 1 >= n)
-			break;
-		for (size_t j = 0; j < pairSize; ++j)
-		{
-			subChain.push_back(*(pairStart + j));
-		}
-	}
+// 	//now the sub chain starting with b2 and then the rest of bs
+// 	for (size_t i = pairSize * 2 ; i - 1 < n; i += pairSize * 2)
+// 	{
+// 		auto pairStart = _vectorSorted.begin() + i;
+// 		//std::cout << "i is currently: " << i << " and the vector size is: " << n << " and i + pairSize * 2 - 1 is: " << i + pairSize * 2 - 1 << std::endl;
+// 		//std ::cout << "pairStart: " << *pairStart << std::endl;
+// 		if (i + pairSize - 1 >= n)
+// 			break;
+// 		for (size_t j = 0; j < pairSize; ++j)
+// 		{
+// 			subChain.push_back(*(pairStart + j));
+// 		}
+// 	}
 
-//	std::cout << "Sub chain: ";	
-	//for (const auto& val : subChain)
-	//	std::cout << val << " ";
-//	std::cout << std::endl;	
+// //	std::cout << "Sub chain: ";	
+// 	//for (const auto& val : subChain)
+// 	//	std::cout << val << " ";
+// //	std::cout << std::endl;	
 	
-	unsigned int jacobsthalIndex = 3; 
-	unsigned int jacobsthalPrev = jacobsthalCalc(jacobsthalIndex - 1); // calc(2)
-	unsigned int jacobsthalCurr = jacobsthalCalc(jacobsthalIndex);     // calc(3)
-	int insertions = jacobsthalCurr - jacobsthalPrev;
-//	std::cout << "Initial jacobsthal number is: " << jacobsthalCurr << std::endl;
-//	std::cout << "Initial insertions count is: " << insertions << std::endl;
-//	std::cout << "Previous jacobsthal number is: " << jacobsthalPrev << std::endl;
+// 	unsigned int jacobsthalIndex = 3; 
+// 	unsigned int jacobsthalPrev = jacobsthalCalc(jacobsthalIndex - 1); // calc(2)
+// 	unsigned int jacobsthalCurr = jacobsthalCalc(jacobsthalIndex);     // calc(3)
+// 	int insertions = jacobsthalCurr - jacobsthalPrev;
+// //	std::cout << "Initial jacobsthal number is: " << jacobsthalCurr << std::endl;
+// //	std::cout << "Initial insertions count is: " << insertions << std::endl;
+// //	std::cout << "Previous jacobsthal number is: " << jacobsthalPrev << std::endl;
 
 
-	std::vector<bool> inserted(subChain.size(), false);
+// 	std::vector<bool> inserted(subChain.size(), false);
 
 
-	while (insertions > 0)
-	{
-		if (insertions <= 0)
-			break;
-		if ((size_t)insertions > subChain.size())
-			break;
-	//	std::cout << "Insertions: " << insertions << " and the size of subChain is: " << subChain.size() << std::endl;
-		int indexOffset = 0;
-		while (insertions > 0)
-		{
-			int insertIndexSub = (jacobsthalCurr - 1) * pairSize - 1 - indexOffset;
-		//	std::cout << "Pair size: " << pairSize << std::endl;
-		//	std::cout << "Insert index sub: " << insertIndexSub << std::endl;
-			if (insertIndexSub < 0 || insertIndexSub >= (int)subChain.size())
-			{
-			//	std::cout << "Insert index sub is out of bounds, breaking the loop." << std::endl;
-				break;
-			}
-		//	std::cout << "The biggest number in the inserted chunk is : " << subChain[insertIndexSub] << std::endl;
-			//now we find where to insert the subChain element into the mainChain
-			//for that we need to look at the biggest numbers each pairSize element in the mainChainbut only up to corresponding index of "a" for the "b" we are inserting
-		//	std:: cout << "Main chain before insertion: ";
-		//	for (const auto& val : mainChain)
-		//		std::cout << val << " ";
-		//	std::cout << std::endl;
-		//	std::cout << "Looking for the position to insert the chunk of subChain at index: " << insertIndexSub << " with value: " << subChain[insertIndexSub] << std::endl;
-			//we need to find the position in the mainChain where we can insert the subChain element
-			auto insertionIt = mainChain.end(); // default to end in case nothing is greater
-			for (auto it = mainChain.begin(); it + pairSize - 1 < mainChain.end(); it += pairSize) {
-				if (*(it + pairSize - 1) >= subChain[insertIndexSub]) {
-					insertionIt = it;
-					break;
-				}
-			}
-			//auto it = std::lower_bound(mainChain.begin(), mainChain.end(), subChain[insertIndexSub]);
-		//	std::cout << "The iterator points to: " << *insertionIt << std::endl;
-			//now we insert the whole pairSize chunk of subChain into the mainChain at the found position with offset of pairSize
-			//mainChain.insert(it - pairSize + 1, subChain.begin() + insertIndexSub - pairSize + 1, subChain.begin() + insertIndexSub + 1);
-			mainChain.insert(insertionIt, subChain.begin() + insertIndexSub - pairSize + 1, subChain.begin() + insertIndexSub + 1);
+// 	while (insertions > 0)
+// 	{
+// 		if (insertions <= 0)
+// 			break;
+// 		if ((size_t)insertions > subChain.size())
+// 			break;
+// 	//	std::cout << "Insertions: " << insertions << " and the size of subChain is: " << subChain.size() << std::endl;
+// 		int indexOffset = 0;
+// 		while (insertions > 0)
+// 		{
+// 			int insertIndexSub = (jacobsthalCurr - 1) * pairSize - 1 - indexOffset;
+// 		//	std::cout << "Pair size: " << pairSize << std::endl;
+// 		//	std::cout << "Insert index sub: " << insertIndexSub << std::endl;
+// 			if (insertIndexSub < 0 || insertIndexSub >= (int)subChain.size())
+// 			{
+// 			//	std::cout << "Insert index sub is out of bounds, breaking the loop." << std::endl;
+// 				break;
+// 			}
+// 		//	std::cout << "The biggest number in the inserted chunk is : " << subChain[insertIndexSub] << std::endl;
+// 			//now we find where to insert the subChain element into the mainChain
+// 			//for that we need to look at the biggest numbers each pairSize element in the mainChainbut only up to corresponding index of "a" for the "b" we are inserting
+// 		//	std:: cout << "Main chain before insertion: ";
+// 		//	for (const auto& val : mainChain)
+// 		//		std::cout << val << " ";
+// 		//	std::cout << std::endl;
+// 		//	std::cout << "Looking for the position to insert the chunk of subChain at index: " << insertIndexSub << " with value: " << subChain[insertIndexSub] << std::endl;
+// 			//we need to find the position in the mainChain where we can insert the subChain element
+// 			auto insertionIt = mainChain.end(); // default to end in case nothing is greater
+// 			for (auto it = mainChain.begin(); it + pairSize - 1 < mainChain.end(); it += pairSize) {
+// 				if (*(it + pairSize - 1) >= subChain[insertIndexSub]) {
+// 					insertionIt = it;
+// 					break;
+// 				}
+// 			}
+// 			//auto it = std::lower_bound(mainChain.begin(), mainChain.end(), subChain[insertIndexSub]);
+// 		//	std::cout << "The iterator points to: " << *insertionIt << std::endl;
+// 			//now we insert the whole pairSize chunk of subChain into the mainChain at the found position with offset of pairSize
+// 			//mainChain.insert(it - pairSize + 1, subChain.begin() + insertIndexSub - pairSize + 1, subChain.begin() + insertIndexSub + 1);
+// 			mainChain.insert(insertionIt, subChain.begin() + insertIndexSub - pairSize + 1, subChain.begin() + insertIndexSub + 1);
 
-		//	std::cout << "Main chain after insertion of the chunk: ";
-		//	for (const auto& val : mainChain)
-		//		std::cout << val << " ";
-		//	std::cout << std::endl;
-			inserted[insertIndexSub] = true;
+// 		//	std::cout << "Main chain after insertion of the chunk: ";
+// 		//	for (const auto& val : mainChain)
+// 		//		std::cout << val << " ";
+// 		//	std::cout << std::endl;
+// 			inserted[insertIndexSub] = true;
 
-			insertions--;
-			indexOffset += pairSize;
-		}
+// 			insertions--;
+// 			indexOffset += pairSize;
+// 		}
 
-		jacobsthalIndex++;
-		jacobsthalPrev = jacobsthalCurr;
-		jacobsthalCurr = jacobsthalCalc(jacobsthalIndex);
-		insertions = jacobsthalCurr - jacobsthalPrev;
-		insertions = jacobsthalCurr - jacobsthalPrev;
-	//	std::cout << "Next jacobsthal number is: " << jacobsthalCurr << std::endl;
-	//	std::cout << "Next insertions count is: " << insertions << std::endl;
-	}
+// 		jacobsthalIndex++;
+// 		jacobsthalPrev = jacobsthalCurr;
+// 		jacobsthalCurr = jacobsthalCalc(jacobsthalIndex);
+// 		insertions = jacobsthalCurr - jacobsthalPrev;
+// 		insertions = jacobsthalCurr - jacobsthalPrev;
+// 	//	std::cout << "Next jacobsthal number is: " << jacobsthalCurr << std::endl;
+// 	//	std::cout << "Next insertions count is: " << insertions << std::endl;
+// 	}
 	
-			for (int i = subChain.size() - 1; i >= static_cast<int>(pairSize - 1); i -= pairSize) 
-			{
-			if (inserted[i])
-				continue;
+// 			for (int i = subChain.size() - 1; i >= static_cast<int>(pairSize - 1); i -= pairSize) 
+// 			{
+// 			if (inserted[i])
+// 				continue;
 		
-			// Insert chunk ending at index i
-			auto insertionIt = mainChain.end();
-			for (auto it = mainChain.begin(); it + pairSize - 1 < mainChain.end(); it += pairSize) {
-				if (*(it + pairSize - 1) >= subChain[i]) {
-					insertionIt = it;
-					break;
-				}
-			}
-			mainChain.insert(insertionIt, subChain.begin() + i - pairSize + 1, subChain.begin() + i + 1);
-			//std::cout << "after Jacobstal ran out, Main chain after inserting the chunk ending at index " << i << ": ";
-			//for (const auto& val : mainChain)
-			//	std::cout << val << " ";
-			//std::cout << std::endl;
-		}
-	// int isRemainder = -1;
-	// //remainder will also be the size of the pairSize pairs
-	// if (n % (pairSize * 2) != 0)
-	// 	isRemainder = 1;
-	// //print out the remainder which may include multiple numbers based on pairSize so FOR loop is calculated based on pairSize
-	//  std::cout << "Remainder: ";
-	// if (isRemainder == 1)
-	// {
-	// 	for (size_t i = n - n % (pairSize * 2); i < n; ++i)
-	// 	{
-	// 		if (i % pairSize == 0 && i != 0)
-	// 			std::cout << " ";
-	// 		std::cout << _vecSorted[i] << " ";
-	// 	}
-	// 	std::cout << std::endl;
-	// }
-	// else
-	// 	std::cout << "No remainder" << std::endl;
+// 			// Insert chunk ending at index i
+// 			auto insertionIt = mainChain.end();
+// 			for (auto it = mainChain.begin(); it + pairSize - 1 < mainChain.end(); it += pairSize) {
+// 				if (*(it + pairSize - 1) >= subChain[i]) {
+// 					insertionIt = it;
+// 					break;
+// 				}
+// 			}
+// 			mainChain.insert(insertionIt, subChain.begin() + i - pairSize + 1, subChain.begin() + i + 1);
+// 			//std::cout << "after Jacobstal ran out, Main chain after inserting the chunk ending at index " << i << ": ";
+// 			//for (const auto& val : mainChain)
+// 			//	std::cout << val << " ";
+// 			//std::cout << std::endl;
+// 		}
+// 	// int isRemainder = -1;
+// 	// //remainder will also be the size of the pairSize pairs
+// 	// if (n % (pairSize * 2) != 0)
+// 	// 	isRemainder = 1;
+// 	// //print out the remainder which may include multiple numbers based on pairSize so FOR loop is calculated based on pairSize
+// 	//  std::cout << "Remainder: ";
+// 	// if (isRemainder == 1)
+// 	// {
+// 	// 	for (size_t i = n - n % (pairSize * 2); i < n; ++i)
+// 	// 	{
+// 	// 		if (i % pairSize == 0 && i != 0)
+// 	// 			std::cout << " ";
+// 	// 		std::cout << _vectorSorted[i] << " ";
+// 	// 	}
+// 	// 	std::cout << std::endl;
+// 	// }
+// 	// else
+// 	// 	std::cout << "No remainder" << std::endl;
 
 
-	// for (size_t i = 0; pairSize * 2 + i < n; ++i)
-	// {
-	// 	if (i % pairSize == 0 && i != 0)
-	// 		std::cout << " ";
-	// 	std::cout << _vecSorted[i] << " ";
-	// }
-	// std::cout << std::endl;
+// 	// for (size_t i = 0; pairSize * 2 + i < n; ++i)
+// 	// {
+// 	// 	if (i % pairSize == 0 && i != 0)
+// 	// 		std::cout << " ";
+// 	// 	std::cout << _vectorSorted[i] << " ";
+// 	// }
+// 	// std::cout << std::endl;
 
 	
 	
 	
 	
-	// jacobsthalInsertion(mainChain, subChain);
-	// if (remainder != -1)
-	// {
-	// 	auto it = std::lower_bound(mainChain.begin(), mainChain.end(), remainder);
-	// 	mainChain.insert(it, remainder);
-	// }
+// 	// jacobsthalInsertion(mainChain, subChain);
+// 	// if (remainder != -1)
+// 	// {
+// 	// 	auto it = std::lower_bound(mainChain.begin(), mainChain.end(), remainder);
+// 	// 	mainChain.insert(it, remainder);
+// 	// }
 
-	for (size_t i = 0; i < mainChain.size(); ++i)
-			_vecSorted[i] = mainChain[i];
-	//std::cout << "-------------------------------------------" << std::endl;
-	//std::cout << "Sorted vector after vectorSort: ";
-	//for (const auto& val : _vecSorted)
-	//	std::cout << val << " ";
-//std::cout << std::endl;
-	//std::cout << "-------------------------------------------" << std::endl;
+// 	for (size_t i = 0; i < mainChain.size(); ++i)
+// 			_vectorSorted[i] = mainChain[i];
+// 	//std::cout << "-------------------------------------------" << std::endl;
+// 	//std::cout << "Sorted vector after vectorSort: ";
+// 	//for (const auto& val : _vectorSorted)
+// 	//	std::cout << val << " ";
+// //std::cout << std::endl;
+// 	//std::cout << "-------------------------------------------" << std::endl;
 
-	return;
-}
+// 	return;
+// }
+
+
+
+
+
+
+
 
 // std::vector<int> PmergeMe::vectorSort(std::vector<int> vec)
 // {
@@ -375,15 +382,15 @@ void PmergeMe::vectorSort(unsigned int pairSize)
 // 	return mainChain;
 // }
 
-void PmergeMe::jacobsthalInsertion(std::vector<int> &mainChain, std::vector<int> &subChain)
-{
-	//implement the jacobsthal insertion here, placeholder for now
-	for (size_t i = 0; i < subChain.size(); ++i)
-	{
-		auto it = std::lower_bound(mainChain.begin(), mainChain.end(), subChain[i]);
-		mainChain.insert(it, subChain[i]);
-	}
-}
+// void PmergeMe::jacobsthalInsertion(std::vector<int> &mainChain, std::vector<int> &subChain)
+// {
+// 	//implement the jacobsthal insertion here, placeholder for now
+// 	for (size_t i = 0; i < subChain.size(); ++i)
+// 	{
+// 		auto it = std::lower_bound(mainChain.begin(), mainChain.end(), subChain[i]);
+// 		mainChain.insert(it, subChain[i]);
+// 	}
+// }
 
 unsigned int PmergeMe::jacobsthalCalc(unsigned int n) const
 {

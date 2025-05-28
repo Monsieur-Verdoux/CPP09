@@ -24,8 +24,8 @@ class PmergeMe
 {
 	private:
 		int _argc; // number of arguments
-		std::vector<int> _vecSorted; // vector to store integers
-		std::vector<int> _vecUnsorted; // vector to store integers
+		std::vector<int> _vectorSorted; // vector to store integers
+		std::vector<int> _vectorUnsorted; // vector to store integers
 		std::deque<int> _dequeSorted; // deque to store integers
 		std::deque<int> _dequeUnsorted; // deque to store integers
 		void validateInput(char **argv, int argc); // validate the input string
