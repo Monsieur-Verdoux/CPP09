@@ -96,7 +96,7 @@ void PmergeMe::vectorSort(unsigned int pairSize)
 			size_t insertionPos = insertionIt - mainChain.begin();
 			size_t boundaryPos = maxChunkSearchIndex * pairSize;
 			// std::cout << "Insertion position: " << insertionPos << ", Boundary position: " << boundaryPos << std::endl;
-			if (insertionPos == boundaryPos && insertionPos == mainChain.size()) //needs to be investigated
+			if (insertionPos == boundaryPos)// && insertionPos == mainChain.size()) //needs to be investigated
 			{
 				offset++;  // shrink search area for next b(x-1)
 			}
@@ -134,6 +134,7 @@ void PmergeMe::vectorSort(unsigned int pairSize)
 		jacobsthalPrev = jacobsthalCurr;
 		jacobsthalCurr = jacobsthalCalc(jacobsthalIndex);
 		insertions = jacobsthalCurr - jacobsthalPrev;
+		offset = 0;
 	}
 
 	for (int i = (int)subChain.size() - 1; i >= static_cast<int>(pairSize - 1); i -= pairSize)
