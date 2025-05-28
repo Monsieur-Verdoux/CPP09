@@ -12,7 +12,7 @@
 
 NAME := PmergeMe
 CFLAGS := -Wall -Wextra -Werror
-SRC := main.cpp PmergeMe.cpp Deque.cpp Vector.cpp
+SRC := main.cpp PmergeMe.cpp
 OBJ := $(SRC:.cpp=.o)
 
 all: $(NAME)

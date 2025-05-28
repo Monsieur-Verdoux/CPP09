@@ -49,7 +49,7 @@ void PmergeMe::vectorSort(unsigned int pairSize)
 
 	auto binaryFindInsertion = [&](int value, size_t maxPairsIndex) {
 		size_t left = 0;
-		size_t right = maxPairsIndex; // inclusive
+		size_t right = maxPairsIndex;
 
 		while (left < right)
 		{
@@ -85,8 +85,7 @@ void PmergeMe::vectorSort(unsigned int pairSize)
 
 			size_t maxChunkSearchIndex = jacobsthalCurr + insertedCount - offset;
 			size_t totalChunks = mainChain.size() / pairSize;
-			//  std::cout << "Total chunks: " << totalChunks << std::endl;
-			//std::cout << "Max chunk search index: " << maxChunkSearchIndex << std::endl;
+
 			if (maxChunkSearchIndex >= totalChunks)
 				maxChunkSearchIndex = totalChunks;
 
@@ -95,34 +94,13 @@ void PmergeMe::vectorSort(unsigned int pairSize)
 
 			size_t insertionPos = insertionIt - mainChain.begin();
 			size_t boundaryPos = maxChunkSearchIndex * pairSize;
-			// std::cout << "Insertion position: " << insertionPos << ", Boundary position: " << boundaryPos << std::endl;
-			if (insertionPos == boundaryPos)// && insertionPos == mainChain.size()) //needs to be investigated
+		
+			if (insertionPos == boundaryPos)
 			{
-				offset++;  // shrink search area for next b(x-1)
+				offset++;  
 			}
 
-			// std::cout << "We are insertign chunk: ";
-			// for (int j = insertIndexSub - pairSize + 1; j <= insertIndexSub; ++j)
-			// 	std::cout << subChain[j] << " ";
-			// std::cout << "into mainChain at position: " << (insertionIt - mainChain.begin()) / pairSize << std::endl;
-
-			// std::cout << "Main chain before insertion: ";
-			// for (const auto& val : mainChain)
-			// 	std::cout << val << " ";
-			// std::cout << std::endl;
-
-			// std::cout << "Sub chain before insertion: ";
-			// for (const auto& val : subChain)
-			// 	std::cout << val << " ";
-			// std::cout << std::endl;
-
-
 			mainChain.insert(insertionIt, subChain.begin() + insertIndexSub - pairSize + 1, subChain.begin() + insertIndexSub + 1);
-
-			// std::cout << "Main chain after insertion: ";
-			// for (const auto& val : mainChain)
-			// 	std::cout << val << " ";
-			// std::cout << std::endl;
 
 			inserted[insertIndexSub] = true;
 			insertions--;
@@ -142,38 +120,14 @@ void PmergeMe::vectorSort(unsigned int pairSize)
 		if (inserted[i])
 			continue;
 
-		size_t maxChunkSearchIndex = jacobsthalCurr + insertedCount; // - offset;
+		size_t maxChunkSearchIndex = jacobsthalCurr + insertedCount;
 		size_t totalChunks = mainChain.size() / pairSize;
-		// std::cout << "Total chunks: " << totalChunks << std::endl;
-		// std::cout << "Max chunk search index: " << maxChunkSearchIndex << std::endl;
+
 		if (maxChunkSearchIndex >= totalChunks)
 			maxChunkSearchIndex = totalChunks;
 
 		int valueToInsert = subChain[i];
 		auto insertionIt = binaryFindInsertion(valueToInsert, maxChunkSearchIndex);
-
-		// size_t insertionPos = insertionIt - mainChain.begin();
-		// size_t boundaryPos = maxChunkSearchIndex * pairSize;
-		// // std::cout << "Insertion position: " << insertionPos << ", Boundary position: " << boundaryPos << std::endl;
-		// if (insertionPos == boundaryPos) {
-		// 	offset++;  // shrink search area for next b(x-1)
-		// }
-
-		// std::cout << "We are insertign chunk: ";
-		// for (int j = i - pairSize + 1; j <= i; ++j)
-		// 	std::cout << subChain[j] << " ";
-		// std::cout << "into mainChain at position: " << (insertionIt - mainChain.begin()) / pairSize << std::endl;
-		// std::cout << "Main chain before insertion: ";
-		// for (const auto& val : mainChain)
-		// 	std::cout << val << " ";
-		// std::cout << std::endl;
-		// std::cout << "Sub chain before insertion: ";
-		// for (const auto& val : subChain)
-		// 	std::cout << val << " ";
-		// std::cout << std::endl;
-
-
-	
 
 		mainChain.insert(insertionIt, subChain.begin() + i - pairSize + 1, subChain.begin() + i + 1);
 		insertedCount++;
