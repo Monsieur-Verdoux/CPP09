@@ -85,7 +85,7 @@ void PmergeMe::dequeSort(unsigned int pairSize)
 			size_t maxChunkSearchIndex = jacobsthalCurr + insertedCount;
 			size_t totalChunks = mainChain.size() / pairSize;
 			if (maxChunkSearchIndex >= totalChunks)
-				maxChunkSearchIndex = totalChunks - 1;
+				maxChunkSearchIndex = totalChunks;
 
 			int valueToInsert = subChain[insertIndexSub];
 			auto insertionIt = binaryFindInsertion(valueToInsert, maxChunkSearchIndex);
@@ -112,7 +112,7 @@ void PmergeMe::dequeSort(unsigned int pairSize)
 		size_t maxChunkSearchIndex = jacobsthalCurr + insertedCount;
 		size_t totalChunks = mainChain.size() / pairSize;
 		if (maxChunkSearchIndex >= totalChunks)
-			maxChunkSearchIndex = totalChunks - 1;
+			maxChunkSearchIndex = totalChunks;
 
 		int valueToInsert = subChain[i];
 		auto insertionIt = binaryFindInsertion(valueToInsert, maxChunkSearchIndex);
