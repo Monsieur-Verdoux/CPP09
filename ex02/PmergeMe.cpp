@@ -67,6 +67,8 @@ void PmergeMe::vectorSort(unsigned int pairSize)
 	size_t n = _vectorSorted.size();
 	if (pairSize * 2 > n)
 		return;
+
+	//first we recursively sort pairs of elements with size pairSize doubling each time
 	
 	for (size_t i = 0; i + 2 * pairSize - 1 < n; i += 2 * pairSize)
 	{
@@ -84,6 +86,8 @@ void PmergeMe::vectorSort(unsigned int pairSize)
 
 	std::vector<int> mainChain;
 	std::vector<int> subChain;
+
+	// Now we create the main chain and sub chain from the sorted pairs, with the main chain containing the b1 element and all "a" (bigger) elements, and the sub chain containing the rest of "b" (smaller) elements.
 
 	auto firstPairStart = _vectorSorted.begin();
 	for (size_t i = 0; i < pairSize; ++i)
@@ -107,6 +111,8 @@ void PmergeMe::vectorSort(unsigned int pairSize)
 			subChain.push_back(*(pairStart + j));
 	}
 
+	// Now we calculate the Jacobsthal numbers to determine how many elements to insert from the sub chain into the main chain in a specific order.
+
 	unsigned int jacobsthalIndex = 3;
 	unsigned int jacobsthalPrev = jacobsthalCalc(jacobsthalIndex - 1);
 	unsigned int jacobsthalCurr = jacobsthalCalc(jacobsthalIndex);
@@ -129,26 +135,22 @@ void PmergeMe::vectorSort(unsigned int pairSize)
 
 			size_t maxChunkSearchIndex = jacobsthalCurr + insertedCount - offset;
 			size_t totalChunks = mainChain.size() / pairSize;
-
 			if (maxChunkSearchIndex >= totalChunks)
 				maxChunkSearchIndex = totalChunks;
 
 			int valueToInsert = subChain[insertIndexSub];
-			auto insertionIt = binaryFindInsertionVector(mainChain, valueToInsert, maxChunkSearchIndex, pairSize);
+			auto insertionIt = binaryFindInsertionVector(mainChain, valueToInsert, maxChunkSearchIndex, pairSize); //custom binary search to find the insertion point
 
 			size_t insertionPos = insertionIt - mainChain.begin();
 			size_t boundaryPos = maxChunkSearchIndex * pairSize;
 		
-			if (insertionPos == boundaryPos)
-			{
+			if (insertionPos == boundaryPos) // this is to handle the case when the insertion position is at the boundary of the current chunk so the seach area shrinks
 				offset++;  
-			}
 
-			mainChain.insert(insertionIt, subChain.begin() + insertIndexSub - pairSize + 1, subChain.begin() + insertIndexSub + 1);
-
+			mainChain.insert(insertionIt, subChain.begin() + insertIndexSub - pairSize + 1, subChain.begin() + insertIndexSub + 1); // insert the elements from the sub chain into the main chain
 			inserted[insertIndexSub] = true;
 			insertions--;
-			insertedCount++;
+			insertedCount++; //tacking how many elements we have inserted so far which affects the next search area
 			indexOffset += pairSize;
 		}
 
@@ -163,22 +165,19 @@ void PmergeMe::vectorSort(unsigned int pairSize)
 	{
 		if (inserted[i])
 			continue;
-
 		size_t maxChunkSearchIndex = jacobsthalCurr + insertedCount;
 		size_t totalChunks = mainChain.size() / pairSize;
-
 		if (maxChunkSearchIndex >= totalChunks)
 			maxChunkSearchIndex = totalChunks;
-
 		int valueToInsert = subChain[i];
-		auto insertionIt = binaryFindInsertionVector(mainChain, valueToInsert, maxChunkSearchIndex, pairSize);
+		auto insertionIt = binaryFindInsertionVector(mainChain, valueToInsert, maxChunkSearchIndex, pairSize); //the remaining elements are inserted in reverse order to maintain the correct order in the main chain
 
 		mainChain.insert(insertionIt, subChain.begin() + i - pairSize + 1, subChain.begin() + i + 1);
 		insertedCount++;
 	}
 
 	for (size_t i = 0; i < mainChain.size(); ++i)
-		_vectorSorted[i] = mainChain[i];
+		_vectorSorted[i] = mainChain[i]; // copy the sorted main chain back to the original vector
 }
 
 std::deque<int>::iterator PmergeMe::binaryFindInsertionDeque(std::deque<int> &mainChain, int value, size_t maxPairsIndex, unsigned int pairSize)
@@ -268,7 +267,6 @@ void PmergeMe::dequeSort(unsigned int pairSize)
 
 			if (maxChunkSearchIndex >= totalChunks)
 				maxChunkSearchIndex = totalChunks;
-
 			int valueToInsert = subChain[insertIndexSub];
 			auto insertionIt = binaryFindInsertionDeque(mainChain, valueToInsert, maxChunkSearchIndex, pairSize);
 
