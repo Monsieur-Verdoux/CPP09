@@ -319,6 +319,9 @@ void PmergeMe::validateInput(char **argv, int argc)
 {
 	if (argc < 2)
 		throw std::runtime_error("Error: please provide a string of positive integers.");
+
+	std::unordered_set<int> seen;
+	
 	for (int i = 1; i < argc; ++i)
 	{
 		std::string arg = argv[i];
@@ -327,8 +330,8 @@ void PmergeMe::validateInput(char **argv, int argc)
 		try 
 		{
 			int num = std::stoi(arg);
-			if (std::find(_vectorUnsorted.begin(), _vectorUnsorted.end(), num) != _vectorUnsorted.end())
-				throw std::runtime_error("Error: duplicate numbers are not allowed.");
+			if (!seen.insert(num).second)
+                throw std::runtime_error("Error: duplicate numbers are not allowed.");
 			_vectorUnsorted.push_back(num);
 			_dequeUnsorted.push_back(num);
 		}
