@@ -6,7 +6,7 @@
 /*   By: akovalev <akovalev@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/20 16:30:58 by akovalev          #+#    #+#             */
-/*   Updated: 2025/05/20 16:30:58 by akovalev         ###   ########.fr       */
+/*   Updated: 2025/06/02 18:59:50 by akovalev         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -317,9 +317,6 @@ void PmergeMe::dequeSort(unsigned int pairSize)
 
 void PmergeMe::validateInput(char **argv, int argc)
 {
-	if (argc < 2)
-		throw std::runtime_error("Error: please provide a string of positive integers.");
-
 	std::unordered_set<int> seen;
 	
 	for (int i = 1; i < argc; ++i)
