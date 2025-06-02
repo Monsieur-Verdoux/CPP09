@@ -12,7 +12,7 @@
 
 #include "PmergeMe.hpp"
 
-PmergeMe::PmergeMe(char **argv, int argc) : _argc(argc)
+PmergeMe::PmergeMe(char **argv, int argc)
 {
 	validateInput(argv, argc);
 
@@ -21,36 +21,45 @@ PmergeMe::PmergeMe(char **argv, int argc) : _argc(argc)
 	vectorSort(1);
 	auto endVec = std::chrono::high_resolution_clock::now();
 	auto durationVec = std::chrono::duration_cast<std::chrono::microseconds>(endVec - startVec);
+
 	std::cout << "Before: ";
 	for (size_t i = 0; i < _vectorUnsorted.size(); ++i)
 		std::cout << _vectorUnsorted[i] << " ";
 	std::cout << std::endl;
 	std::cout << "After: ";
+
 	for (size_t i = 0; i < _vectorSorted.size(); ++i)
 		std::cout << _vectorSorted[i] << " ";
 	std::cout << std::endl;
+	if (!std::is_sorted(_vectorSorted.begin(), _vectorSorted.end()))
+		throw std::runtime_error("Error: vector is not sorted.");
+	std::cout << "Time to process a range of " << _vectorUnsorted.size() << " elements with std::vector: " << durationVec.count() << " us" << std::endl;
 
-	for (size_t i = 0; i < _vectorSorted.size() - 1; ++i)
-	{
-		if (_vectorSorted[i] > _vectorSorted[i + 1])
-			throw std::runtime_error("Error: vector is not sorted.");
-	}
-	std::cout << "Time to process a range of " << _vectorUnsorted.size() << " elements with std::vector: " 
-			  << durationVec.count() << " us" << std::endl;
-	
 	auto startDeq = std::chrono::high_resolution_clock::now();
 	_dequeSorted = _dequeUnsorted;
 	dequeSort(1);
 	auto endDeq = std::chrono::high_resolution_clock::now();
 	auto durationDeq = std::chrono::duration_cast<std::chrono::microseconds>(endDeq - startDeq);
+	if (!std::is_sorted(_dequeSorted.begin(), _dequeSorted.end()))
+		throw std::runtime_error("Error: deque is not sorted.");
+	std::cout << "Time to process a range of " << _dequeUnsorted.size() << " elements with std::deque: " << durationDeq.count() << " us" << std::endl;
+}
 
-	for (size_t i = 0; i < _dequeSorted.size() - 1; ++i)
+std::vector<int>::iterator PmergeMe::binaryFindInsertionVector(std::vector<int> &mainChain, int value, size_t maxPairsIndex, unsigned int pairSize)
+{
+	size_t left = 0;
+	size_t right = maxPairsIndex;
+
+	while (left < right) 
 	{
-		if (_dequeSorted[i] > _dequeSorted[i + 1])
-			throw std::runtime_error("Error: deque is not sorted.");
+		size_t mid = left + (right - left) / 2;
+		int midVal = *(mainChain.begin() + mid * pairSize + pairSize - 1);
+		if (midVal > value)
+			right = mid;
+		else
+			left = mid + 1;
 	}
-	std::cout << "Time to process a range of " << _dequeUnsorted.size() << " elements with std::deque: " 
-			  << durationDeq.count() << " us" << std::endl;
+	return mainChain.begin() + left * pairSize;
 }
 
 void PmergeMe::vectorSort(unsigned int pairSize) 
@@ -98,22 +107,6 @@ void PmergeMe::vectorSort(unsigned int pairSize)
 			subChain.push_back(*(pairStart + j));
 	}
 
-	auto binaryFindInsertion = [&](int value, size_t maxPairsIndex) {
-		size_t left = 0;
-		size_t right = maxPairsIndex;
-
-		while (left < right)
-		{
-			size_t mid = left + (right - left) / 2;
-			int midVal = *(mainChain.begin() + mid * pairSize + pairSize - 1);
-			if (midVal > value)
-				right = mid;
-			else
-				left = mid + 1;
-		}
-		return mainChain.begin() + left * pairSize;
-	};
-
 	unsigned int jacobsthalIndex = 3;
 	unsigned int jacobsthalPrev = jacobsthalCalc(jacobsthalIndex - 1);
 	unsigned int jacobsthalCurr = jacobsthalCalc(jacobsthalIndex);
@@ -141,7 +134,7 @@ void PmergeMe::vectorSort(unsigned int pairSize)
 				maxChunkSearchIndex = totalChunks;
 
 			int valueToInsert = subChain[insertIndexSub];
-			auto insertionIt = binaryFindInsertion(valueToInsert, maxChunkSearchIndex);
+			auto insertionIt = binaryFindInsertionVector(mainChain, valueToInsert, maxChunkSearchIndex, pairSize);
 
 			size_t insertionPos = insertionIt - mainChain.begin();
 			size_t boundaryPos = maxChunkSearchIndex * pairSize;
@@ -178,7 +171,7 @@ void PmergeMe::vectorSort(unsigned int pairSize)
 			maxChunkSearchIndex = totalChunks;
 
 		int valueToInsert = subChain[i];
-		auto insertionIt = binaryFindInsertion(valueToInsert, maxChunkSearchIndex);
+		auto insertionIt = binaryFindInsertionVector(mainChain, valueToInsert, maxChunkSearchIndex, pairSize);
 
 		mainChain.insert(insertionIt, subChain.begin() + i - pairSize + 1, subChain.begin() + i + 1);
 		insertedCount++;
@@ -186,6 +179,23 @@ void PmergeMe::vectorSort(unsigned int pairSize)
 
 	for (size_t i = 0; i < mainChain.size(); ++i)
 		_vectorSorted[i] = mainChain[i];
+}
+
+std::deque<int>::iterator PmergeMe::binaryFindInsertionDeque(std::deque<int> &mainChain, int value, size_t maxPairsIndex, unsigned int pairSize)
+{
+	size_t left = 0;
+	size_t right = maxPairsIndex;
+
+	while (left < right) 
+	{
+		size_t mid = left + (right - left) / 2;
+		int midVal = *(mainChain.begin() + mid * pairSize + pairSize - 1);
+		if (midVal > value)
+			right = mid;
+		else
+			left = mid + 1;
+	}
+	return mainChain.begin() + left * pairSize;
 }
 
 void PmergeMe::dequeSort(unsigned int pairSize) 
@@ -233,22 +243,6 @@ void PmergeMe::dequeSort(unsigned int pairSize)
 			subChain.push_back(*(pairStart + j));
 	}
 
-	auto binaryFindInsertion = [&](int value, size_t maxPairsIndex) {
-		size_t left = 0;
-		size_t right = maxPairsIndex;
-
-		while (left < right)
-		{
-			size_t mid = left + (right - left) / 2;
-			int midVal = *(mainChain.begin() + mid * pairSize + pairSize - 1);
-			if (midVal > value)
-				right = mid;
-			else
-				left = mid + 1;
-		}
-		return mainChain.begin() + left * pairSize;
-	};
-
 	unsigned int jacobsthalIndex = 3;
 	unsigned int jacobsthalPrev = jacobsthalCalc(jacobsthalIndex - 1);
 	unsigned int jacobsthalCurr = jacobsthalCalc(jacobsthalIndex);
@@ -276,7 +270,7 @@ void PmergeMe::dequeSort(unsigned int pairSize)
 				maxChunkSearchIndex = totalChunks;
 
 			int valueToInsert = subChain[insertIndexSub];
-			auto insertionIt = binaryFindInsertion(valueToInsert, maxChunkSearchIndex);
+			auto insertionIt = binaryFindInsertionDeque(mainChain, valueToInsert, maxChunkSearchIndex, pairSize);
 
 			size_t insertionPos = insertionIt - mainChain.begin();
 			size_t boundaryPos = maxChunkSearchIndex * pairSize;
@@ -313,7 +307,7 @@ void PmergeMe::dequeSort(unsigned int pairSize)
 			maxChunkSearchIndex = totalChunks;
 
 		int valueToInsert = subChain[i];
-		auto insertionIt = binaryFindInsertion(valueToInsert, maxChunkSearchIndex);
+		auto insertionIt = binaryFindInsertionDeque(mainChain, valueToInsert, maxChunkSearchIndex, pairSize);
 
 		mainChain.insert(insertionIt, subChain.begin() + i - pairSize + 1, subChain.begin() + i + 1);
 		insertedCount++;
@@ -326,7 +320,7 @@ void PmergeMe::dequeSort(unsigned int pairSize)
 void PmergeMe::validateInput(char **argv, int argc)
 {
 	if (argc < 2)
-		throw std::runtime_error("Error: please provide a string of integers.");
+		throw std::runtime_error("Error: please provide a string of positive integers.");
 	for (int i = 1; i < argc; ++i)
 	{
 		std::string arg = argv[i];
@@ -356,10 +350,20 @@ unsigned int PmergeMe::jacobsthalCalc(unsigned int n) const
 {
 	if (n == 0)
 		return 0;
-	else if (n == 1)
+	if (n == 1)
 		return 1;
-	else
-		return jacobsthalCalc(n - 1) + 2 * jacobsthalCalc(n - 2);
+
+	unsigned int prev2 = 0;
+	unsigned int prev1 = 1;
+	unsigned int current = 0;
+
+	for (unsigned int i = 2; i <= n; ++i)
+	{
+		current = prev1 + 2 * prev2;
+		prev2 = prev1;
+		prev1 = current;
+	}
+	return current;
 }
 
 PmergeMe::PmergeMe()

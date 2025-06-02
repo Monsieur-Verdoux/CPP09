@@ -16,18 +16,12 @@ int main(int argc, char **argv)
 {
 	if (argc < 2)
 	{
-		std::cerr << "Error: please provide a string of integers." << std::endl;
+		std::cerr << "Error: please provide a string of positive integers." << std::endl;
 		return 1;
 	}
 	try
 	{
 		PmergeMe pmergeMe(argv, argc);
-		//pmergeMe.dequeSort();
-		
-		//pmergeMe.printSortedVector();
-		//std::cout << "Sorted deque: ";
-		//pmergeMe.printSortedDeque();
-	
 	}
 	catch (const std::exception &e)
 	{
