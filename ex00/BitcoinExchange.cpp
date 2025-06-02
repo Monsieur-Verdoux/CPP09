@@ -22,7 +22,6 @@ BitcoinExchange::BitcoinExchange(const std::string &inputFilename)
 		throw std::runtime_error("Error: could not open data file.");
 	// Parse the data file and store the data in the map
 	parseDataFile();
-	// Parse the input file and store the data in the multimap
 	parseInputAndPrint();
 }
 
@@ -35,12 +34,9 @@ float BitcoinExchange::improvedStof(const std::string &str, bool& valid) const
 	return value;
 }
 
-//check also for negative values of the exchange rate
-
 void BitcoinExchange::parseDataFile()
 {
 	std::string line;
-	//check that the first line is "date,exchange_rate"
 	std::getline(_dataFile, line);
 	if (line != "date,exchange_rate")
 		throw std::runtime_error("Error while parsing CSV file: invalid data file format.");
@@ -78,7 +74,6 @@ void BitcoinExchange::parseDataFile()
 void BitcoinExchange::parseInputAndPrint()
 {
 	std::string line;
-	//check that the first line is "date | value"
 	std::getline(_inputFile, line);
 	if (line != "date | value")
 		throw std::runtime_error("Error: invalid input file format.");
@@ -91,16 +86,13 @@ void BitcoinExchange::parseInputAndPrint()
 		else
 		{
 			std::string date = line.substr(0, line.find(pipe));
-			//removing trailing space
-			//date.erase(0, date.find_first_not_of(" \t"));
-			date.erase(date.find_last_not_of(" \t") + 1);//remove trailing spaces
+			date.erase(date.find_last_not_of(" \t") + 1);
 			if (!isDateValid(date))
 			{
 				std::cerr << "Error: bad input => " << line << std::endl;
 				continue;
 			}
 			std::string value = line.substr(line.find(pipe) + 1);
-			//removing leading space
 			value.erase(0, value.find_first_not_of(" \t"));
 			float valueFloat;
 			bool valid = false;
@@ -134,7 +126,7 @@ void BitcoinExchange::calculateExchangeRate(std::string date, float value)
 		return;
 	}
 	// Find the closest date in the data file that is less than or equal to the input date
-	auto it = _dataFileMap.lower_bound(date); //means "find the first element that is greater than or equal to date"
+	auto it = _dataFileMap.lower_bound(date);
 	if (it == _dataFileMap.end())
 		it--;
 	else if (it->first != date)
