@@ -13,10 +13,8 @@
 #pragma once
 
 #include <map>
-#include <string>
 #include <iostream>
 #include <fstream>
-#include <stdexcept>
 #include <sstream>
 
 class BitcoinExchange
